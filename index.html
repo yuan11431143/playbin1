@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="terminal">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PlayBin – paste code, play games</title>
+<style>
+:root{--bg:#020a04;--card:#06140a;--ink:#a7d8b4;--mute:#4e8a5f;--acc:#1fa851;--on:#021208;--line:#0e3a1d;color-scheme:dark;--f:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+:root[data-theme=midnight]{--bg:#0e1116;--card:#171b22;--ink:#e6edf3;--mute:#8b96a5;--acc:#58a6ff;--on:#041021;--line:#2a313c}
+:root[data-theme=dracula]{--bg:#1e1f29;--card:#282a36;--ink:#f8f8f2;--mute:#9aa0c0;--acc:#bd93f9;--on:#1b1030;--line:#44475a}
+:root[data-theme=sunset]{--bg:#1a1014;--card:#26171c;--ink:#ffe8dc;--mute:#c79a8a;--acc:#ff7a45;--on:#2a0e03;--line:#4a2a30}
+:root[data-theme=light]{--bg:#f6f8fa;--card:#fff;--ink:#1f2328;--mute:#656d76;--acc:#0a8f5b;--on:#fff;--line:#d0d7de;color-scheme:light}
+:root[data-theme=amber]{--bg:#0d0900;--card:#161000;--ink:#ffd27a;--mute:#a07a22;--acc:#ffb000;--on:#1a1000;--line:#4a3500}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--f);min-height:100vh}
+body.sans{--f:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+body.scan::after{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);z-index:50}
+header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:20;flex-wrap:wrap}
+.logo{font-size:20px;font-weight:700;cursor:pointer;white-space:nowrap}.logo b{color:var(--acc)}
+.sp{flex:1}#q{max-width:260px}
+main{max-width:1040px;margin:0 auto;padding:18px}
+input,textarea,select{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:9px 11px;font:inherit;width:100%}
+input:focus,textarea:focus,select:focus{outline:1px solid var(--acc)}
+textarea{min-height:240px;font-size:13px;resize:vertical;font-family:ui-monospace,Menlo,Consolas,monospace}
+button{background:var(--acc);color:var(--on);border:0;border-radius:6px;padding:9px 15px;font:inherit;font-weight:700;cursor:pointer}
+button:disabled{opacity:.5}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button.ghost:hover,button.ghost.on{border-color:var(--acc);color:var(--acc)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+body.compact .grid{grid-template-columns:1fr;gap:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:6px;position:relative}
+.card:hover{border-color:var(--acc);box-shadow:0 0 12px -4px var(--acc)}
+.card h3{margin:0;font-size:16px;word-break:break-word;padding-right:28px}.card p{margin:0;color:var(--mute);font-size:13px;flex:1}
+.fav{position:absolute;top:10px;right:10px;background:none;border:0;color:var(--mute);padding:0;font-size:18px;line-height:1}.fav.on{color:var(--acc)}
+.tag{display:inline-block;border:1px solid var(--line);color:var(--mute);border-radius:99px;padding:0 8px;font-size:11px;margin-left:4px}
+.meta{font-size:12px;color:var(--mute)}
+.hero{padding:22px 0 14px}.hero h1{margin:0 0 6px;font-size:26px}.hero p{margin:0;color:var(--mute)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0}
+label{display:block;margin:12px 0 4px;color:var(--mute);font-size:13px}
+iframe{width:100%;height:min(75vh,640px);border:1px solid var(--line);border-radius:8px;background:#fff;margin-top:10px}
+.msg{color:var(--mute);padding:30px 0;text-align:center}.err{color:#ff6b6b}
+#shade{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:30;display:none}
+#drawer{position:fixed;top:0;bottom:0;left:0;width:260px;max-width:82vw;background:var(--card);border-right:1px solid var(--line);z-index:40;transform:translateX(-102%);transition:transform .2s;padding:16px 14px;display:flex;flex-direction:column;gap:4px}
+body.open #drawer{transform:none}body.open #shade{display:block}
+#drawer .item{text-align:left;background:none;color:var(--ink);font-weight:500;border:1px solid transparent;width:100%}
+#drawer .item:hover,#drawer .item.on{border-color:var(--acc);color:var(--acc)}
+.sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin:8px 0}
+.sw button{display:flex;align-items:center;gap:8px;background:var(--card);color:var(--ink);border:1px solid var(--line);font-weight:500}
+.sw button.on{border-color:var(--acc)}.dot{width:14px;height:14px;border-radius:50%;flex:none}
+.set{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:12px 0}
+.set h3{margin:0 0 4px;font-size:15px;color:var(--acc)}
+.bar{height:22px;border:1px solid var(--line);border-radius:11px;overflow:hidden;margin:10px 0;background:var(--bg)}
+.bar>div{height:100%;background:var(--acc);transition:width .4s}
+.form{max-width:380px}
+</style>
+</head>
+<body>
+<div id="shade"></div><nav id="drawer"></nav>
+<header>
+  <button class="ghost" id="menuBtn" aria-label="Menu">☰</button>
+  <div class="logo" id="home">&lt;<b>Play</b>Bin/&gt;</div>
+  <div class="sp"></div>
+  <input id="q" type="search" placeholder="search games…">
+  <button class="ghost" id="authBtn">Log in</button>
+  <button id="newBtn">+ Upload</button>
+</header>
+<main id="app"></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+// ====== CONFIG: paste your Supabase values (Project Settings → API) ======
+var SUPABASE_URL='YOUR_SUPABASE_URL';
+var SUPABASE_KEY='YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY';
+var DEV_EMAIL='limziyuan87788790@gmail.com';
+// =========================================================================
+var app=document.getElementById('app'),q=document.getElementById('q'),drawer=document.getElementById('drawer'),authBtn=document.getElementById('authBtn');
+var sb=null,user=null,games=[],myLikes={},status='loading',MAX=200000,view='all',sort='new',tagF='',myLv={n:0,l:1};
+var LV=[0,5,20,50,100,200,350,500,750,1000],LT=['Newbie','Scripter','Coder','Hacker','Builder','Dev','Engineer','Architect','Wizard','Legend'];
+var TAGS=['Action','Puzzle','Arcade','Strategy','Racing','Other'];
+var THEMES=[['terminal','Dark Green','#1fa851'],['amber','Amber CRT','#ffb000'],['midnight','Midnight','#58a6ff'],['dracula','Dracula','#bd93f9'],['sunset','Sunset','#ff7a45'],['light','Light','#0a8f5b']];
+var S={theme:'terminal',font:'mono',compact:false,scan:false,favs:[]};
+try{var raw=localStorage.getItem('playbin');if(raw)Object.assign(S,JSON.parse(raw))}catch(e){}
+function save(){try{localStorage.setItem('playbin',JSON.stringify(S))}catch(e){}}
+function apply(){document.documentElement.setAttribute('data-theme',S.theme);var c=document.body.classList;c.toggle('sans',S.font==='sans');c.toggle('compact',!!S.compact);c.toggle('scan',!!S.scan)}
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function ago(ts){var s=(Date.now()-new Date(ts).getTime())/1000;if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago'}
+function lvl(n){var l=1;for(var i=0;i<LV.length;i++)if(n>=LV[i])l=i+1;return l}
+function maxG(l){return 3+l*2}
+function loggedIn(){return !!user}
+function mine(){return games.filter(function(g){return user&&g.uid===user.id})}
+function myTotalLikes(){return mine().reduce(function(a,g){return a+g.likes},0)}
+function toggleMenu(o){document.body.classList.toggle('open',o)}
+document.getElementById('menuBtn').onclick=function(){buildMenu();toggleMenu(!document.body.classList.contains('open'))};
+document.getElementById('shade').onclick=function(){toggleMenu(false)};
+function go(fn){toggleMenu(false);fn()}
+function buildMenu(){
+  drawer.textContent='';
+  var t=el('div','logo');t.innerHTML='&lt;<b>Play</b>Bin/&gt;';t.style.marginBottom='10px';drawer.appendChild(t);
+  drawer.appendChild(el('div','meta',loggedIn()?'● '+(user.user_metadata&&user.user_metadata.name||user.email)+' · Lv'+lvl(myTotalLikes()):'○ guest (log in to create & like)'));
+  [['🏠 All games','all',function(){view='all';home()}],['🔥 Popular','pop',function(){view='all';sort='pop';home()}],['⭐ Favorites','fav',function(){view='fav';home()}],['📁 My games','mine',function(){view='mine';home()}],['🏆 My level','lvl',level],['⬆ Upload a game','up',upload],['⚙ Settings','set',settings],['ℹ About','about',about]].forEach(function(m){
+    var b=el('button','item'+(m[1]===view?' on':''),m[0]);b.onclick=function(){go(m[2])};drawer.appendChild(b)});
+}
+function setAuthBtn(){authBtn.textContent=loggedIn()?'Log out':'Log in'}
+authBtn.onclick=function(){if(loggedIn()){sb.auth.signOut().then(function(){user=null;setAuthBtn();load()})}else authPage()};
+
+function load(){
+  if(!sb)return;
+  sb.from('game_cards').select('*').order('created_at',{ascending:false}).limit(200).then(function(r){
+    if(r.error){status='error';home();return}
+    games=r.data;status='ok';
+    if(!loggedIn()){myLikes={};redrawIfIdle();return}
+    sb.from('likes').select('game_id').then(function(l){myLikes={};(l.data||[]).forEach(function(x){myLikes[x.game_id]=1});redrawIfIdle()});
+  });
+}
+function redrawIfIdle(){if(!document.querySelector('iframe')&&!document.querySelector('textarea')&&!document.querySelector('.form')&&!document.querySelector('.set'))home()}
+
+function home(){
+  app.textContent='';
+  var h=el('div','hero');h.appendChild(el('h1',null,'> paste code. play games._'));
+  h.appendChild(el('p',null,'Drop in a single HTML file or paste your code and anyone can play it. Every game runs sandboxed.'));app.appendChild(h);
+  if(status==='loading'){app.appendChild(el('div','msg','Loading games…'));return}
+  if(status==='error'){app.appendChild(el('div','msg err','Couldn’t reach the game library. Check the Supabase config and that schema.sql has been run.'));return}
+  var bar=el('div','row');
+  [['all','All'],['fav','Favorites'],['mine','Mine']].forEach(function(t){var b=el('button','ghost'+(view===t[0]?' on':''),t[1]);b.onclick=function(){view=t[0];home()};bar.appendChild(b)});
+  var sel=el('select');sel.style.width='auto';sel.style.marginLeft='auto';
+  [['new','Newest'],['pop','Most played'],['likes','Most liked'],['az','A–Z']].forEach(function(o){var op=el('option',null,o[1]);op.value=o[0];if(sort===o[0])op.selected=true;sel.appendChild(op)});
+  sel.onchange=function(){sort=sel.value;home()};bar.appendChild(sel);app.appendChild(bar);
+  var tb=el('div','row');
+  ['All'].concat(TAGS).forEach(function(t){var b=el('button','ghost'+((tagF||'All')===t?' on':''),t);b.style.padding='3px 10px';b.onclick=function(){tagF=t==='All'?'':t;home()};tb.appendChild(b)});
+  app.appendChild(tb);
+  var t=q.value.trim().toLowerCase();
+  var list=games.filter(function(g){
+    if(view==='fav'&&S.favs.indexOf(g.id)<0)return false;
+    if(view==='mine'&&!(user&&g.uid===user.id))return false;
+    if(tagF&&g.tag!==tagF)return false;
+    return !t||(g.title+' '+g.author+' '+(g.description||'')).toLowerCase().indexOf(t)>-1});
+  list.sort(function(a,b){return sort==='pop'?b.plays-a.plays:sort==='likes'?b.likes-a.likes:sort==='az'?a.title.localeCompare(b.title):new Date(b.created_at)-new Date(a.created_at)});
+  if(!list.length){app.appendChild(el('div','msg',games.length?'Nothing here yet.':'No games yet. Be the first to upload one!'));return}
+  var grid=el('div','grid');
+  list.forEach(function(g){
+    var c=el('div','card'),fv=S.favs.indexOf(g.id)>-1;
+    var f=el('button','fav'+(fv?' on':''),fv?'★':'☆');
+    f.onclick=function(e){e.stopPropagation();var i=S.favs.indexOf(g.id);if(i>-1)S.favs.splice(i,1);else S.favs.push(g.id);save();home()};
+    c.appendChild(f);c.appendChild(el('h3',null,g.title));c.appendChild(el('p',null,g.description||'No description.'));
+    var m=el('div','meta','by '+g.author+' · Lv'+g.level+' · '+ago(g.created_at)+' · ♥ '+g.likes+' · '+g.plays+' plays ');
+    if(g.access==='login')m.appendChild(el('span','tag','🔒 login'));
+    if(g.tag)m.appendChild(el('span','tag',g.tag));c.appendChild(m);
+    c.onclick=function(){play(g)};grid.appendChild(c);
+  });
+  app.appendChild(grid);
+}
+function backBtn(){var b=el('button','ghost','← Back');b.onclick=home;return b}
+function play(g){
+  app.textContent='';
+  if(g.access==='login'&&!loggedIn()){app.appendChild(backBtn());app.appendChild(el('div','msg','🔒 The creator made this game for logged-in players only. Log in to play it.'));return}
+  var row=el('div','row');row.appendChild(backBtn());
+  var tt=el('div');tt.style.flex='1';tt.appendChild(el('b',null,g.title));tt.appendChild(el('div','meta','by '+g.author+' · Lv'+g.level));row.appendChild(tt);
+  var lk=el('button','ghost'+(myLikes[g.id]?' on':''),(myLikes[g.id]?'♥ ':'♡ ')+g.likes);
+  lk.onclick=function(){
+    if(!loggedIn()){alert('Log in to like games.');return}
+    lk.disabled=true;var was=!!myLikes[g.id];
+    var p=was?sb.from('likes').delete().eq('game_id',g.id).eq('uid',user.id):sb.from('likes').insert({game_id:g.id});
+    p.then(function(r){lk.disabled=false;if(r.error)return;if(was){delete myLikes[g.id];g.likes--}else{myLikes[g.id]=1;g.likes++}
+      lk.textContent=(was?'♡ ':'♥ ')+g.likes;lk.classList.toggle('on',!was)});
+  };
+  row.appendChild(lk);
+  var fs=el('button','ghost','Fullscreen');row.appendChild(fs);
+  if(user&&g.uid===user.id){var del=el('button','ghost','Delete');
+    del.onclick=function(){if(confirm('Delete this game?'))sb.from('games').delete().eq('id',g.id).then(function(r){if(r.error)alert('Couldn’t delete.');else{load();home()}})};row.appendChild(del)}
+  app.appendChild(row);
+  var info=el('div','msg','Loading game…');app.appendChild(info);
+  sb.from('games').select('code').eq('id',g.id).single().then(function(r){
+    info.remove();
+    if(r.error||!r.data){app.appendChild(el('div','msg err','Couldn’t load this game.'));return}
+    var f=document.createElement('iframe');
+    f.setAttribute('sandbox','allow-scripts allow-pointer-lock allow-forms allow-modals');
+    f.setAttribute('allow','fullscreen; gamepad; autoplay');f.srcdoc=r.data.code;app.appendChild(f);
+    fs.onclick=function(){if(f.requestFullscreen)f.requestFullscreen()};
+    if(g.description)app.appendChild(el('p','meta',g.description));
+    app.appendChild(el('p','meta','Sandboxed: it can’t access your account or other games. Click inside the game to give it keyboard focus.'));
+    sb.rpc('add_play',{gid:g.id}).then(function(){});
+  });
+}
+function authPage(){
+  app.textContent='';app.appendChild(backBtn());
+  var mode='in',form=el('div','form');
+  function draw(){
+    form.textContent='';form.appendChild(el('h2',null,mode==='in'?'> log in':'> create account'));
+    var name=null;
+    if(mode==='up'){form.appendChild(el('label',null,'Display name'));name=el('input');name.maxLength=24;form.appendChild(name)}
+    form.appendChild(el('label',null,'Email'));var em=el('input');em.type='email';form.appendChild(em);
+    form.appendChild(el('label',null,'Password (min 6 characters)'));var pw=el('input');pw.type='password';form.appendChild(pw);
+    var msg=el('div','meta');msg.style.margin='10px 0';
+    var go=el('button',null,mode==='in'?'Log in':'Sign up'),sw=el('button','ghost',mode==='in'?'Need an account?':'Have an account?');
+    var r=el('div','row');r.appendChild(go);r.appendChild(sw);form.appendChild(r);form.appendChild(msg);
+    sw.onclick=function(){mode=mode==='in'?'up':'in';draw()};
+    go.onclick=function(){
+      msg.className='meta';go.disabled=true;msg.textContent='Please wait…';
+      var p=mode==='in'?sb.auth.signInWithPassword({email:em.value.trim(),password:pw.value}):sb.auth.signUp({email:em.value.trim(),password:pw.value,options:{data:{name:name.value.trim()}}});
+      p.then(function(r){go.disabled=false;
+        if(r.error){msg.className='meta err';msg.textContent=r.error.message;return}
+        if(!r.data.session){msg.textContent='Check your email to confirm your account, then log in.';return}
+        user=r.data.user;setAuthBtn();load();view='all';home()});
+    };
+  }
+  draw();app.appendChild(form);
+}
+function upload(){
+  app.textContent='';app.appendChild(backBtn());app.appendChild(el('h2',null,'> upload a game'));
+  if(!loggedIn()){app.appendChild(el('div','msg err','🔒 Only logged-in accounts can create games. Please log in first.'));return}
+  var cap=maxG(lvl(myTotalLikes()));
+  if(mine().length>=cap){app.appendChild(el('div','msg err','You’ve reached your limit of '+cap+' games at your level. Earn more likes to level up!'));return}
+  var form=el('div');
+  function field(l,n){form.appendChild(el('label',null,l));form.appendChild(n);return n}
+  var title=field('Title',el('input'));title.maxLength=60;
+  var acc=field('Who can play?',el('select'));[['guest','Everyone (guests + logged-in players)'],['login','Logged-in players only']].forEach(function(o){var op=el('option',null,o[1]);op.value=o[0];acc.appendChild(op)});
+  var tag=field('Category',el('select'));TAGS.forEach(function(t){tag.appendChild(el('option',null,t))});
+  var desc=field('Short description (optional)',el('input'));desc.maxLength=140;
+  var code=field('Paste your HTML code…',el('textarea'));code.placeholder='<!DOCTYPE html>\n<html>…your whole game…</html>';
+  var file=el('input');file.type='file';file.accept='.html,.htm,text/html';field('…or upload an .html file',file);
+  file.onchange=function(){var r=new FileReader();r.onload=function(){code.value=r.result;if(!title.value)title.value=file.files[0].name.replace(/\.html?$/i,'')};r.readAsText(file.files[0])};
+  var msg=el('div','meta');msg.style.margin='10px 0';
+  var row=el('div','row'),prev=el('button','ghost','Preview'),pub=el('button',null,'Publish');
+  row.appendChild(prev);row.appendChild(pub);form.appendChild(row);form.appendChild(msg);
+  var pf=null;
+  prev.onclick=function(){if(pf)pf.remove();pf=document.createElement('iframe');pf.setAttribute('sandbox','allow-scripts allow-pointer-lock allow-forms allow-modals');pf.srcdoc=code.value;form.appendChild(pf)};
+  pub.onclick=function(){
+    msg.className='meta';
+    if(!title.value.trim()||!code.value.trim()){msg.className='meta err';msg.textContent='Title and code are required.';return}
+    if(code.value.length>MAX){msg.className='meta err';msg.textContent='Too big ('+Math.round(code.value.length/1000)+' KB). Limit is '+MAX/1000+' KB.';return}
+    pub.disabled=true;msg.textContent='Publishing…';
+    sb.from('games').insert({title:title.value.trim(),access:acc.value,tag:tag.value,description:desc.value.trim(),code:code.value}).then(function(r){
+      if(r.error){pub.disabled=false;msg.className='meta err';msg.textContent='Couldn’t publish: '+r.error.message;return}
+      view='all';load();home()});
+  };
+  app.appendChild(form);
+}
+function level(){
+  app.textContent='';app.appendChild(el('h2',null,'> creator level'));
+  if(!loggedIn()){app.appendChild(el('div','msg err','Log in to track your creator level.'));return}
+  var n=myTotalLikes(),l=lvl(n),top=l>=10,next=LV[l],b=el('div','set');
+  var pct=top?100:Math.round((n-LV[l-1])/(next-LV[l-1])*100);
+  b.appendChild(el('h3',null,'Level '+l+' / 10 · '+LT[l-1]));
+  b.appendChild(el('div','meta','Total likes on your games: '+n));
+  var bar=el('div','bar'),fill=el('div');fill.style.width=pct+'%';bar.appendChild(fill);b.appendChild(bar);
+  b.appendChild(el('div',null,top?'MAX LEVEL reached. You are a Legend!':(next-n)+' more likes to reach Level '+(l+1)+' ('+LT[l]+') · '+pct+'%'));
+  b.appendChild(el('div','meta','Game slots: '+mine().length+' / '+maxG(l)));
+  app.appendChild(b);
+  var t=el('div','set');t.appendChild(el('h3',null,'All levels (total likes needed)'));
+  LV.forEach(function(v,i){t.appendChild(el('div',i+1===l?'':'meta',(i+1===l?'▶ ':'· ')+'Lv'+(i+1)+' '+LT[i]+' — '+v+'+ likes · '+maxG(i+1)+' games'))});
+  app.appendChild(t);
+  var g2=el('div','set');g2.appendChild(el('h3',null,'Your games'));
+  if(!mine().length)g2.appendChild(el('div','meta','None yet.'));
+  mine().forEach(function(g){g2.appendChild(el('div','meta',g.title+' — ♥ '+g.likes+' · '+g.plays+' plays'))});
+  app.appendChild(g2);
+}
+function settings(){
+  app.textContent='';app.appendChild(el('h2',null,'> settings'));
+  function box(t,s){var b=el('div','set');b.appendChild(el('h3',null,t));if(s)b.appendChild(el('div','meta',s));app.appendChild(b);return b}
+  var tb=box('Theme','Green-on-black is the default.');var sw=el('div','sw');
+  THEMES.forEach(function(t){var b=el('button',S.theme===t[0]?'on':'');var d=el('span','dot');d.style.background=t[2];b.appendChild(d);b.appendChild(el('span',null,t[1]));
+    b.onclick=function(){S.theme=t[0];save();apply();settings()};sw.appendChild(b)});tb.appendChild(sw);
+  var fb=box('Font'),fr=el('div','row');
+  [['mono','Monospace (code)'],['sans','Sans-serif']].forEach(function(o){var b=el('button','ghost'+(S.font===o[0]?' on':''),o[1]);b.onclick=function(){S.font=o[0];save();apply();settings()};fr.appendChild(b)});fb.appendChild(fr);
+  var ob=box('Display'),or=el('div','row');
+  [['compact','Compact list view'],['scan','CRT scanlines']].forEach(function(o){var b=el('button','ghost'+(S[o[0]]?' on':''),(S[o[0]]?'✓ ':'')+o[1]);b.onclick=function(){S[o[0]]=!S[o[0]];save();apply();settings()};or.appendChild(b)});ob.appendChild(or);
+  var rb=box('Data','Favorites and settings are saved on this device only.');
+  var r=el('button','ghost','Reset settings');r.onclick=function(){S={theme:'terminal',font:'mono',compact:false,scan:false,favs:S.favs};save();apply();settings()};rb.appendChild(r);
+}
+function about(){
+  app.textContent='';app.appendChild(el('h2',null,'> about playbin'));
+  var b=el('div','set');
+  ['PlayBin is a place to share single-file HTML games. Paste your code or upload a file, pick a category, and publish.','Each game runs in a sandboxed iframe with no access to the site or your account.','Only logged-in accounts can create games. Creators choose whether guests can play. Earn likes to raise your creator level from 1 to 10 (1000 total likes for Level 10).','Tips: keep games to one file under 200 KB, inline your images (data URIs), and avoid external scripts.','Developer contact: '+DEV_EMAIL].forEach(function(t){var p=el('p',null,t);p.style.margin='0 0 10px';b.appendChild(p)});
+  app.appendChild(b);
+}
+document.getElementById('home').onclick=function(){view='all';home()};
+document.getElementById('newBtn').onclick=upload;
+q.oninput=function(){if(!document.querySelector('textarea')&&!document.querySelector('.form'))home()};
+apply();home();
+if(!window.supabase||SUPABASE_URL.indexOf('YOUR_')===0){status='error';home();return}
+sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+sb.auth.getSession().then(function(r){user=r.data.session?r.data.session.user:null;setAuthBtn();load()});
+sb.auth.onAuthStateChange(function(_e,s){var u=s?s.user:null;if((u&&u.id)!==(user&&user.id)){user=u;setAuthBtn();load()}});
+})();
+</script>
+</body>
+</html>
